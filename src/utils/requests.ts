@@ -24,9 +24,9 @@ export const getTransactionsPaginated = ({
     throw new Error("Page cannot be null")
   }
 
-  const start = page * TRANSACTIONS_PER_PAGE
-  const end = start + TRANSACTIONS_PER_PAGE
-
+  const start = page * TRANSACTIONS_PER_PAGE //1 * 5 = 5
+  const end = start + TRANSACTIONS_PER_PAGE // 5 + 5 = 10
+  // console.log(start + " " + end)
   if (start > data.transactions.length) {
     throw new Error(`Invalid page ${page}`)
   }
@@ -35,14 +35,14 @@ export const getTransactionsPaginated = ({
 
   return {
     nextPage,
-    data: data.transactions.slice(start, end),
+    data: data.transactions.slice(0, end),
   }
 }
 
 export const getTransactionsByEmployee = ({ employeeId }: RequestByEmployeeParams) => {
-  // if (!employeeId) {
-  //   throw new Error("Employee id cannot be empty")
-  // }
+  if (!employeeId) {
+    throw new Error("Employee id cannot be empty")
+  }
 
   return data.transactions.filter((transaction) => transaction.employee.id === employeeId)
 }
