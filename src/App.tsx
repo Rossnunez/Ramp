@@ -7,6 +7,7 @@ import { usePaginatedTransactions } from "./hooks/usePaginatedTransactions"
 import { useTransactionsByEmployee } from "./hooks/useTransactionsByEmployee"
 import { EMPTY_EMPLOYEE } from "./utils/constants"
 import { Employee } from "./utils/types"
+import { useCustomFetch } from "src/hooks/useCustomFetch"
 
 export function App() {
   const { data: employees, ...employeeUtils } = useEmployees()
@@ -14,15 +15,7 @@ export function App() {
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState(false)
-
-  // useEffect(() => {
-  //   if (transactions) {
-  //     console.log(paginatedTransactions?.nextPage);
-  //     if (!paginatedTransactions?.nextPage) {
-  //       //
-  //     }
-  //   }
-  // }, [paginatedTransactions]);
+  const { clearCacheByEndpoint } = useCustomFetch()
 
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
@@ -31,6 +24,7 @@ export function App() {
 
   const loadAllTransactions = useCallback(async () => {
     // setIsLoading(true)
+    clearCacheByEndpoint(['paginatedTransactions'])
     transactionsByEmployeeUtils.invalidateData()
 
     await employeeUtils.fetchAll()
@@ -38,14 +32,15 @@ export function App() {
     
 
     setIsLoading(false)
-  }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils])
+  }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils, clearCacheByEndpoint])
 
   const loadTransactionsByEmployee = useCallback(
     async (employeeId: string) => {
+      clearCacheByEndpoint(['transactionsByEmployee'])
       paginatedTransactionsUtils.invalidateData()
       await transactionsByEmployeeUtils.fetchById(employeeId)
     },
-    [paginatedTransactionsUtils, transactionsByEmployeeUtils]
+    [paginatedTransactionsUtils, transactionsByEmployeeUtils, clearCacheByEndpoint]
   )
 
   useEffect(() => {
@@ -83,6 +78,7 @@ export function App() {
             }
             setSelectedEmployee(true)
             await loadTransactionsByEmployee(newValue.id)
+            return
           }}
         />
 
